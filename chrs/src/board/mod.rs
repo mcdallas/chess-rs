@@ -286,12 +286,14 @@ impl Board {
                         pixmap.fill_rect(rect, &red_highlight_paint, t, None);
                     }
                     let tree = self.get_glyph_tree(&p);
+                    let horizontal_offset = (check_side - glyph_width as f32) / 5.0; // Centering based on piece width
+                    let vertical_offset = (check_side - glyph_width as f32) / 5.0;   // Assuming piece height is similar to width
+
                     let transform = tiny_skia::Transform::from_translate(
-                        // TODO: Fix magic number
-                        x as f32 * check_side + self.ruler_offset as f32 + check_side / 8.0,
-                        (7 - y) as f32 * check_side + check_side / 8.0,
+                        x as f32 * check_side + self.ruler_offset as f32 + horizontal_offset,
+                        (7 - y) as f32 * check_side + vertical_offset,
                     );
-                    let fit = usvg::FitTo::Width(glyph_width);
+                    let fit = usvg::FitTo::Zoom(1.8);
                     resvg::render(&tree, fit, transform, pixmap.as_mut());
                 }
             }
@@ -444,7 +446,8 @@ impl Board {
                 i as f32 * check_side + glyph_width as f32 / 8.0,
                 glyph_width as f32 / 8.0,
             );
-            let fit = usvg::FitTo::Width(glyph_width);
+            
+            let fit = usvg::FitTo::Width(glyph_width * 1.5 as u32);
             resvg::render(&tree, fit, glyph_t, pm.as_mut());
         }
 
