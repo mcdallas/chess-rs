@@ -3,6 +3,7 @@ mod app;
 mod board;
 mod cache;
 mod ui;
+mod util;
 
 use app::App;
 use pixels::Error;
@@ -21,4 +22,17 @@ fn main() {
         pretty_env_logger::init();
         pollster::block_on(App::run());
     }
+}
+
+
+#[cfg(target_arch = "wasm32")]
+#[macro_export]
+macro_rules! print {
+    ($($t:tt)*) => (crate::util::log(&format_args!($($t)*).to_string()))
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[macro_export]
+macro_rules! print {
+    ($($t:tt)*) => (println!($($t)*))
 }
