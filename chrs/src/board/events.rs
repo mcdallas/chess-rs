@@ -1,5 +1,6 @@
 pub use winit::event::{ElementState, MouseButton};
 
+#[derive(Debug)]
 pub enum BoardEvent {
     CursorMoved {
         position: (usize, usize),
@@ -7,6 +8,10 @@ pub enum BoardEvent {
     MouseInput {
         state: ElementState,
         button: MouseButton,
+    },
+    TouchInput {
+        state: ElementState,
+        position: (usize, usize),
     },
     CursorLeft,
 }

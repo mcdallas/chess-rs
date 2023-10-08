@@ -9,7 +9,7 @@ use pixels::{Error, Pixels, SurfaceTexture};
 use std::cell::RefCell;
 use std::rc::Rc;
 use winit::dpi::LogicalSize;
-use winit::event::Event;
+use winit::event::{Event, Touch, TouchPhase, ElementState, MouseButton};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 
@@ -136,6 +136,41 @@ impl App {
                                 let board_event = BoardEvent::MouseInput { state, button };
                                 board.handle_event(board_event, &config);
                             }
+                            Touch(touch) => {
+                                match touch.phase {
+                                    TouchPhase::Started => {
+                                        let pos = pixels.window_pos_to_pixel(touch.location.into());
+                                        if let Ok(pos) = pos {
+                                            let board_event = BoardEvent::TouchInput {
+                                                state: ElementState::Pressed,
+                                                position: pos
+                                            };
+                                            board.handle_event(board_event, &config);
+                                        }
+                                    }
+                                    TouchPhase::Moved => {
+                                        let pos = pixels.window_pos_to_pixel(touch.location.into());
+                                        if let Ok(pos) = pos {
+                                            let board_event = BoardEvent::TouchInput {
+                                                state: ElementState::Pressed, // Touch is still in a pressed state while moving
+                                                position: pos
+                                            };
+                                            board.handle_event(board_event, &config);
+                                        }
+                                    }
+                                    TouchPhase::Ended | TouchPhase::Cancelled => {
+                                        let pos = pixels.window_pos_to_pixel(touch.location.into());
+                                        if let Ok(pos) = pos {
+                                            let board_event = BoardEvent::TouchInput {
+                                                state: ElementState::Released,
+                                                position: pos
+                                            };
+                                            board.handle_event(board_event, &config);
+                                        }
+                                    }
+                                }
+                            }
+                            
                             CursorMoved { position, .. } => {
                                 if let Ok(pos) = pixels.window_pos_to_pixel(position.into()) {
                                     let board_event = BoardEvent::CursorMoved { position: pos };

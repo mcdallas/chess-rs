@@ -12,6 +12,8 @@ use fontdue::{
 };
 use resvg::{tiny_skia, usvg};
 
+use crate::print;
+
 const W_PROM_OPTS: [BoardPiece; 4] = [
     BoardPiece::WhiteKnight,
     BoardPiece::WhiteBishop,
@@ -96,6 +98,7 @@ impl Board {
     }
 
     pub fn handle_event(&mut self, e: BoardEvent, config: &BoardConfig) {
+        // print!("{:?}", e);
         self.update_mouse_state(e);
 
         if config.get_state() != GameState::InPlay {
@@ -391,15 +394,30 @@ impl Board {
             },
             BoardEvent::CursorMoved { position } => {
                 self.mouse_state.set_cursor_in();
-                // if position.0 as u32 > self.ruler_offset && (position.1 as u32) < self.side_length {
                 let position = (position.0, position.1);
                 self.mouse_state.update_pos(position);
-                // }
             }
+            BoardEvent::TouchInput { state, position, .. } => {
+                // You might want to handle touch input similar to left mouse button
+                match state {
+                    ElementState::Pressed => {
+                        self.mouse_state.set_left_pressed();
+                        self.mouse_state.set_cursor_in();
+                        let position = (position.0, position.1);
+                        self.mouse_state.update_pos(position);
+                    },
+                    ElementState::Released => {
+                        self.mouse_state.set_left_released();
+                        self.mouse_state.unset_cursor_in();
+                    },
+                    _ => {}
+                }
+            },
             BoardEvent::CursorLeft => {
                 self.mouse_state.unset_cursor_in();
             }
         }
+    
     }
 
     fn get_sq_from_pointer(&self) -> Square {
